@@ -7,6 +7,7 @@ use App\Filament\Resources\Media\Pages\EditMedia;
 use App\Filament\Resources\Media\Pages\ListMedia;
 use App\Filament\Resources\Media\Schemas\MediaForm;
 use App\Filament\Resources\Media\Tables\MediaTable;
+use App\Filament\Resources\Media\Pages\ViewMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -44,6 +45,7 @@ class MediaResource extends Resource
         return [
             'index' => ListMedia::route('/'),
             'create' => CreateMedia::route('/create'),
+            'view' => ViewMedia::route('/{record}'),
             'edit' => EditMedia::route('/{record}/edit'),
         ];
     }

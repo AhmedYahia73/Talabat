@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Filament\Resources\Media\Pages\MediaFolderPage;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Action; 
@@ -30,23 +31,9 @@ class MediaTable
                 ->weight('bold')
                 ->icon('heroicon-s-folder')
                 ->iconColor('info')
-                // نربط العمود بالأكشن
-                ->action(
-                    Action::make('view_files')
-                    ->label(fn ($record) => $record->collection_name)
-                    ->icon('heroicon-s-folder')
-                    ->color('yellow')
-                    ->badge(fn ($record) => $record->files_count)
-                    ->badgeColor('info')
-                    ->modalContent(fn ($record) => view('filament.resources.media-folder.pages.manage-folder-files', [
-                        'files' => Media::where('collection_name', $record->collection_name)
-                                    ->where('file_name', '!=', '.placeholder')
-                                    ->get(),
-                        'folder' => $record->collection_name
-                    ]))
-                    ->modalSubmitAction(false) // لإخفاء زر الحفظ في المودال
-                    ->modalWidth('8xl'), 
-                )
+                ->url(fn ($record) => MediaFolderPage::getUrl([
+                    'folder' => $record->collection_name
+                ])),
             ])
             ->filters([
                 //

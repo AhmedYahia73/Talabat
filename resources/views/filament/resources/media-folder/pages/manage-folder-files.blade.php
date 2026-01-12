@@ -1,23 +1,32 @@
 <x-filament-panels::page>
- <a href="{{ \App\Filament\Resources\Media\Pages\MediaFolderPage::getUrl(['folder' => $folder]) }}">
-    Open Media Folder
-</a>
-        @if(empty($files))
-            <div class="text-center py-12">
-                <div class="flex justify-center mb-4">
-                    <x-filament::icon 
-                        icon="heroicon-o-photo" 
-                        class="w-16 h-16 text-gray-400"
-                    />
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                    No files in this folder
-                </h3>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Upload your first file to get started
-                </p>
+    <!-- Back Link -->
+    <a href="{{ \App\Filament\Resources\Media\Pages\MediaFolderPage::getUrl(['folder' => $folder]) }}"
+       class="text-blue-600 hover:underline mb-4 inline-block">
+        ← Open Media Folder
+    </a>
+
+    <!-- If no files -->
+    @if(empty($files))
+        <div class="text-center py-12">
+            <div class="flex justify-center mb-4">
+                <x-filament::icon 
+                    icon="heroicon-o-photo" 
+                    class="w-16 h-16 text-gray-400"
+                />
             </div>
-        @else
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                No files in this folder
+            </h3>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Upload your first file to get started
+            </p>
+        </div>
+    @else
+        <div>
+            <!-- Title -->
+            <h1 class="text-2xl font-bold mb-6">{{ $this->getTitle() }}</h1>
+
+            <!-- Files Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 @foreach($files as $file)
                     <div class="relative group rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden hover:shadow-lg transition-shadow">
@@ -46,7 +55,7 @@
                                 </div>
                             @endif
                         </div>
-                        
+
                         <!-- File Info -->
                         <div class="p-3 space-y-2">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-white truncate" title="{{ $file['name'] }}">
@@ -57,7 +66,7 @@
                                 <span>{{ \Carbon\Carbon::parse($file['created_at'])->format('M d, Y') }}</span>
                             </div>
                         </div>
-                        
+
                         <!-- Actions Overlay -->
                         <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <!-- View/Download -->
@@ -69,7 +78,7 @@
                             >
                                 <x-filament::icon icon="heroicon-o-arrow-down-tray" class="w-5 h-5 text-gray-700 dark:text-gray-300" />
                             </a>
-                            
+
                             <!-- Delete -->
                             <button 
                                 wire:click="deleteFile({{ $file['id'] }})"
@@ -83,6 +92,6 @@
                     </div>
                 @endforeach
             </div>
-        @endif
-    </div>
+        </div>
+    @endif
 </x-filament-panels::page>

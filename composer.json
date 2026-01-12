@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "abdulmajeed-jamaan/filament-translatable-tabs": "^4.0",
+        "eightynine/filament-excel-import": "*",
         "filament/filament": "~4.0",
         "filament/spatie-laravel-media-library-plugin": "*",
         "laravel/framework": "^12.0",
