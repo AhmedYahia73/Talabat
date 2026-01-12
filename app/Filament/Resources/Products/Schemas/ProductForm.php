@@ -2,19 +2,20 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Forms\Components\Select;
 use Filament\Actions\Action;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Tabs;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use App\Filament\trait\category\category;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Forms\Components\CheckboxList;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ProductForm
 {
@@ -140,77 +141,113 @@ class ProductForm
                 ->label('End Date') 
                 ->placeholder('Select end offer date'),
                 
-                TextInput::make('image') 
-                ->id('media-path-input') 
-                ->label('Image Path') 
-                ->live() // مهم جداً لجعل المعاينة تتحدث فوراً
-                ->afterStateUpdated(fn ($state) => $state)// معرف للوصول إليه بسهولة
+                TextInput::make('image')
+                ->label('image path')
+                ->live()
                 ->hintAction(
                     Action::make('open_picker')
-                        ->label('Select Media')
-                        ->icon('heroicon-m-folder-open')
-                        ->modalHeading('Media Library Picker')
-                        ->modalWidth('4xl')
-                        ->modalContent(fn ($component) => view('filament.components.media-picker-logic', [
-                            'target_state_path' => $component->getStatePath(),
-                            'folders' => \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
-                                ->select('collection_name')
-                                ->distinct()
-                                ->pluck('collection_name'),
-                            'allFiles' => \Spatie\MediaLibrary\MediaCollections\Models\Media::all()->map(fn($f) => [
-                                'folder' => $f->collection_name,
-                                'name' => $f->file_name,
-                                'url' => url('storage/' . $f->collection_name . '/' . $f->file_name ),
-                                'path' => $f->collection_name . '/' . $f->file_name 
-                            ]),
-                        ]))
-                        ->modalSubmitAction(false)
-                        
-                        ->registerModalActions([
-                        Action::make('uploadToFolder')
-                        ->label('رفع ملف جديد')
+                        ->label('open media library')
+                        ->icon('heroicon-m-photo')
+                        ->modalWidth('6xl')
                         ->form([
-                            \Filament\Forms\Components\FileUpload::make('new_file')
-                                ->label('اختر الملف')
-                                ->required()
+                            // 1. اختيار المجلد (الفلتر)
+                            Select::make('folder_filter')
+                                ->label('select Folder (Folder)')
+                                ->options(
+                                    Media::distinct()
+                                        ->pluck('collection_name', 'collection_name')
+                                )
+                                ->live() // يجعل المعرض يتحدث فور تغيير المجلد
+                                ->afterStateUpdated(fn ($set) => $set('selected_file_path', null))
+                                ->placeholder('Select Folder For Show Files...'),
+
+                            // 2. قسم الرفع (اختياري: يظهر فقط عند اختيار مجلد)
+                            Section::make('upload image for this folder')
+                            ->hidden(fn ($get) => !$get('folder_filter')) // مخفي حتى تختار مجلد
+                            ->collapsible()
+                            ->collapsed()
+                            ->schema([
+                                FileUpload::make('new_upload')
+                                ->image()
                                 ->disk('public')
-                                ->directory('temp') 
+                                ->directory('media')
+                                ->live()
+                                ->afterStateUpdated(function ($state, $set, $get) {
+                                    if (!$state) return;
+
+                                    // 1. الحصول على اسم الملف الأصلي
+                                    // ملاحظة: $state هنا يكون كائن من نوع TemporaryUploadedFile
+                                    $originalName = \Illuminate\Support\Str::uuid() . $state->getClientOriginalName();
+                                    $folder = $get('folder_filter') ?? 'media';
+
+                                    // 2. نقل الملف يدوياً من المجلد المؤقت إلى المجلد النهائي
+                                    // هذا السطر هو السر في تحويله من .tmp إلى ملف حقيقي
+                                    $finalPath = \Illuminate\Support\Facades\Storage::disk('public')
+                                        ->putFileAs($folder, $state, $originalName);
+
+                                    // 3. الآن نسجل البيانات في قاعدة البيانات بالمسار النهائي
+                                    $media = new \Spatie\MediaLibrary\MediaCollections\Models\Media();
+                                    $media->model_type = 'App\Models\Media';
+                                    $media->model_id = 0;
+                                    $media->collection_name = $folder;
+                                    $media->file_name = $originalName; // الاسم الحقيقي
+                                    $media->name = pathinfo($originalName, PATHINFO_FILENAME);
+                                    $media->disk = 'public';
+                                    $media->uuid = \Illuminate\Support\Str::uuid();
+                                    $media->size = $state->getSize();
+                                    $media->mime_type = $state->getMimeType();
+                                    $media->manipulations = [];
+                                    $media->custom_properties = [];
+                                    $media->generated_conversions = [];
+                                    $media->responsive_images = [];
+                                    $media->save();
+
+                                    // 4. إجبار الخانة على اختيار الملف الجديد بالمسار الصحيح
+                                    $set('selected_file_path', [$folder . '/' . $originalName]);
+
+                                    // 5. تنظيف خانة الرفع لاستقبال ملف آخر إذا أردت
+                                    $set('new_upload', null);
+
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('تم حفظ الصورة في المجلد: ' . $folder)
+                                        ->success()
+                                        ->send();
+                                }),
+                            ]),
+
+                            // 3. معرض الصور المفلتر
+                            CheckboxList::make('selected_file_path')
+                                ->label('الصور المتاحة في المجلد:')
+                                ->hidden(fn ($get) => !$get('folder_filter')) // مخفي حتى تختار مجلد
+                                ->options(function ($get) {
+                                    $folder = $get('folder_filter');
+                                    if (!$folder) return [];
+
+                                    return \Spatie\MediaLibrary\MediaCollections\Models\Media::where('collection_name', $folder)
+                                        ->latest()
+                                        ->get()
+                                        ->mapWithKeys(function ($file) {
+                                            $url = asset('storage/' . $file->collection_name . '/' . $file->file_name);
+                                            return [
+                                                $file->collection_name . '/' . $file->file_name => 
+                                                "<div class='flex flex-col items-center p-2 border rounded-lg hover:bg-primary-50 transition border-gray-200'>
+                                                    <img src='{$url}' class='w-full aspect-square object-cover rounded-md mb-1'>
+                                                    <span class='text-[9px] truncate w-20 text-center text-gray-400'>{$file->file_name}</span>
+                                                </div>"
+                                            ];
+                                        });
+                                })
+                                ->allowHtml()
+                                ->columns(['sm' => 3, 'md' => 4, 'lg' => 6])
+                                ->maxItems(1)
+                                ->required(),
                         ])
-                        ->action(function (array $data, array $arguments, $livewire) {
-                            $folder = $arguments['folder'];
-                            $file = $data['new_file'];
-                            $fullPath = \Illuminate\Support\Facades\Storage::disk('public')->path($file);
-                            $mediaModel = new Media();
-
-                            // لوجيك الحفظ (نفس الكود السابق الخاص بسجل الميديا)
-                            $mediaModel = new \Spatie\MediaLibrary\MediaCollections\Models\Media();
-                            $mediaModel->model_type = 'App\Models\Media';
-                            $mediaModel->model_id = 
-                            
-                            0;
-                            $mediaModel->collection_name = $folder;
-                            $mediaModel->name = pathinfo($file, PATHINFO_FILENAME);
-                            $mediaModel->file_name = basename($file);
-                            $mediaModel->mime_type = \Illuminate\Support\Facades\File::mimeType($fullPath);
-                            $mediaModel->disk = 'public';
-                            $mediaModel->size = \Illuminate\Support\Facades\Storage::disk('public')->size($file);
-                            $mediaModel->uuid = \Illuminate\Support\Str::uuid();
-                            $mediaModel->manipulations = [];
-                            $mediaModel->custom_properties = [];
-                            $mediaModel->generated_conversions = [];
-                            $mediaModel->responsive_images = [];
-                            $mediaModel->order_column = 1;
-                            $mediaModel->save();
-                            
-                            // لوجيك الحفظ (نفس الكود الس  
-
-                            // نقل الملف
-                            \Illuminate\Support\Facades\Storage::disk('public')->move($file, $folder . '/' . basename($file));
-
-                            \Filament\Notifications\Notification::make()->title('Uploaded!')->success()->send();
-                            $livewire->dispatch('refreshMediaPicker');
+                        ->action(function (array $data, $component) {
+                            if (!empty($data['selected_file_path'])) {
+                                $path = is_array($data['selected_file_path']) ? $data['selected_file_path'][0] : $data['selected_file_path'];
+                                $component->state($path);
+                            }
                         })
-                ]),
                 )
                 ->helperText(fn ($state) => view('filament.components.image-preview-helper', [
                     'state' => $state

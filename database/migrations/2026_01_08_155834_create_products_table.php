@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('slug');
             $table->string('image')->nullable();
             $table->float('price');
-            $table->json('gallery');
+            $table->json('gallery')->nullable();
             $table->foreignId('category_id')->nullable()->constrained("categories")->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('sub_category_id')->nullable()->constrained("categories")->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();

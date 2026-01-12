@@ -19,9 +19,58 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Resources\Media\Pages\MediaFolderPage;
-
+use Filament\Support\Facades\FilamentView;
+use Illuminate\Support\Facades\Blade;
 class AdminPanelProvider extends PanelProvider
 {
+
+public function boot()
+{
+FilamentView::registerRenderHook(
+        'panels::head.done',
+        fn (): string => Blade::render('
+            <style>
+                @media print {
+                    /* 1. إخفاء كل العناصر المحيطة بالجدول */
+                    .fi-sidebar, .fi-topbar, .fi-header-actions, 
+                    .fi-header, .fi-footer, .fi-tables-filters-trigger, 
+                    .fi-tables-search-field, .fi-tables-pagination,
+                    .fi-breadcrumbs {
+                        display: none !important;
+                    }
+
+                    /* 2. إزالة الهوامش والقيود عن الجسم الرئيسي */
+                    body, .fi-main, .fi-main-ctn, .fi-page, .fi-section {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: white !important;
+                        overflow: visible !important;
+                    }
+
+                    /* 3. إجبار حاوية الجدول على الظهور */
+                    .fi-tables-container {
+                        display: block !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                    }
+
+                    /* 4. التأكد من أن الجدول نفسه يأخذ عرض الصفحة */
+                    table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                    }
+
+                    /* 5. إظهار الصور */
+                    img {
+                        max-width: 80px !important;
+                        height: auto !important;
+                        display: inline-block !important;
+                    }
+                }
+            </style>
+        '),
+    );
+}
     public function panel(Panel $panel): Panel
     {
         return $panel
