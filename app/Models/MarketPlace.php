@@ -18,6 +18,8 @@ class MarketPlace extends Model implements HasMedia
         'details',
         'image',
         'slug',
+        'lng',
+        'lat',
         'status',
     ];
 
@@ -25,4 +27,12 @@ class MarketPlace extends Model implements HasMedia
         'name' => 'array',
         'details' => 'array',
     ]; 
+    
+    public static function getLatLngAttributes(): array
+    {
+        return [
+            'lat' => 'latitude',
+            'lng' => 'longitude',
+        ];
+    }
 }

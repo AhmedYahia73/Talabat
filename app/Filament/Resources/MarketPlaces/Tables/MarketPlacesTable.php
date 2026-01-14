@@ -25,14 +25,20 @@ class MarketPlacesTable
                 TextColumn::make('name')
                 ->sortable()
                 ->searchable(),
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                ->label('image')
+                ->circular() // لجعل الصورة دائرية (اختياري)
+                ->disk('public') // تأكد من مطابقة الـ Disk المستخدم في الـ Upload
+                ->width(50) // تحديد عرض الصورة في الجدول
+                ->height(50)
+                ->toggleable(),
                 TextColumn::make('slug')
                 ->sortable()
                 ->searchable(),
                 ToggleColumn::make('status')
                 ->label('Status')
                 ->onColor('success')
-                ->offColor('danger'), 
+                ->offColor('danger'),
             ])
             ->filters([
                 //

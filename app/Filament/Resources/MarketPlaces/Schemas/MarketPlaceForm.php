@@ -3,6 +3,8 @@ namespace App\Filament\Resources\MarketPlaces\Schemas;
 
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
+use Dotswan\MapPicker\Fields\Map;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Tabs;
@@ -176,6 +178,26 @@ class MarketPlaceForm
                         ])),
                         TextInput::make('slug')
                         ->required(),  
+
+                        Map::make('location')
+                            ->label('Market Location`')
+                            ->columnSpanFull()
+                            ->defaultLocation(latitude: 30.0444, longitude: 31.2357) // القاهرة كبداية
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // تحديث حقول الـ lat و lng المخفية أو الظاهرة عند تحريك الخريطة
+                                $set('lat', $state['lat']);
+                                $set('lng', $state['lng']);
+                            })
+                            // تأكد من ربط الحقول عند تحميل الصفحة (اختياري حسب تصميمك)
+                            ->afterStateHydrated(function ($state, $record, callable $set) {
+                                if ($record) {
+                                    $set('location', ['lat' => $record->lat, 'lng' => $record->lng]);
+                                }
+                            }),
+
+                        // حقول مخفية لحفظ القيم في الداتابيز
+                        Hidden::make('lat'),
+                        Hidden::make('lng'),
                     ])
                     ->collapsible(),
             ]);
