@@ -110,11 +110,11 @@ class ProductForm
                 )
                 // هنا نحدد الحقول التي ستظهر داخل الـ Modal لإضافة القسم
                 ->createOptionForm([
-                Section::make('Category Info.')
-                ->description('Enter Data of Category')
-                ->schema(self::getSharedFormSchema())
-                ->collapsible(),
-            ]), 
+                    Section::make('Category Info.')
+                    ->description('Enter Data of Category')
+                    ->schema(self::getSharedFormSchema())
+                    ->collapsible(),
+                ]), 
             
                 TextInput::make('price')
                 ->numeric()

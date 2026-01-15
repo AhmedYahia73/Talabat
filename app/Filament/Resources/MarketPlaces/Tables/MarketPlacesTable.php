@@ -2,14 +2,16 @@
 
 namespace App\Filament\Resources\MarketPlaces\Tables;
 
+use Filament\Tables\Table;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\ToggleColumn;
-use Filament\Actions\DeleteAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class MarketPlacesTable
 {
@@ -39,6 +41,11 @@ class MarketPlacesTable
                 ->label('Status')
                 ->onColor('success')
                 ->offColor('danger'),
+            ])
+            ->headerActions([
+                ExportAction::make()->exports([
+                    ExcelExport::make()->fromTable(),
+                ]),
             ])
             ->filters([
                 //

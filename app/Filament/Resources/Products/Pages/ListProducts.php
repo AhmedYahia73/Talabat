@@ -8,6 +8,7 @@ use EightyNine\ExcelImport\ExcelImportAction;
 use App\Filament\exports\products\ProductTemplate;
 use App\Filament\Resources\Products\ProductResource;
 use pxlrbt\FilamentExcel\Actions\Pages\ExportAction;
+use App\Filament\Resources\Products\importExcel;
 
 class ListProducts extends ListRecords
 {
@@ -28,7 +29,7 @@ class ListProducts extends ListRecords
             // 2. زر الاستيراد
             ExcelImportAction::make('import')// أضف اسماً للأكشن هنا
             ->label('Import Excel')
-            ->use(\App\Filament\Resources\Products\importExcel::class),
+            ->use(importExcel::class),
             CreateAction::make(),
         ];
     }

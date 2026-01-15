@@ -20,12 +20,7 @@ use Filament\Forms\Form; // تأكد من استخدام Form بدلاً من Sc
 class MarketPlaceForm
 {
     public static function configure(Schema $schema): Schema
-    { 
-        // '',
-        // '',
-        // 'image',
-        // 'slug',
-        // 'status',
+    {
         return $schema
             ->components([
                 Section::make('MarketPlace Info.')
@@ -36,15 +31,15 @@ class MarketPlaceForm
                             Tab::make('Arabic')
                                 ->schema([
                                     TextInput::make('name.ar')
-                                        ->label('MarketPlace Name (AR)')
-                                        ->required(),
-                                ]),
+                                    ->label('MarketPlace Name (AR)')
+                                    ->required(),
+                            ]),
 
                             Tab::make('English')
                                 ->schema([
-                                    TextInput::make('name.en')
-                                        ->label('MarketPlace Name (EN)'),
-                                ]),
+                                TextInput::make('name.en')
+                                ->label('MarketPlace Name (EN)'),
+                            ]),
                         ]), 
 
                         Tabs::make('Translations')
@@ -180,7 +175,7 @@ class MarketPlaceForm
                         ->required(),  
 
                         Map::make('location')
-                            ->label('Market Location`')
+                            ->label('Market Location')
                             ->columnSpanFull()
                             ->defaultLocation(latitude: 30.0444, longitude: 31.2357) // القاهرة كبداية
                             ->afterStateUpdated(function ($state, callable $set) {
