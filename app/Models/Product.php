@@ -21,12 +21,14 @@ class Product extends Model implements HasMedia
         'category_id', 
         'image',
         'status',
-
+        'discount_id',
+        'tax_id',
         'gallery',
         "price",
         'offer_price',
         'start_date',
         'end_date',
+        'market_place_id',
     ];
 
     protected $casts = [
@@ -35,6 +37,18 @@ class Product extends Model implements HasMedia
         'details' => 'array',
         'short_description' => 'array',
     ]; 
+
+    public function discount(){
+        return $this->belongsTo(Discount::class, 'discount_id');
+    }
+
+    public function market_place(){
+        return $this->belongsTo(MarketPlace::class, 'market_place_id');
+    }
+
+    public function tax(){
+        return $this->belongsTo(Tax::class, 'tax_id');
+    }
 
     public function category(){
         return $this->belongsTo(Category::class, 'category_id');

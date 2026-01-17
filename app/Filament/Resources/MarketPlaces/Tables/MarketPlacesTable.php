@@ -34,6 +34,10 @@ class MarketPlacesTable
                 ->width(50) // تحديد عرض الصورة في الجدول
                 ->height(50)
                 ->toggleable(),
+                TextColumn::make('activity.name')
+                ->label("Activity")
+                ->sortable()
+                ->searchable(),
                 TextColumn::make('slug')
                 ->sortable()
                 ->searchable(),

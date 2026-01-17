@@ -20,7 +20,10 @@ class Category extends Model implements HasMedia
         'slug',
         'image',
         'status',
+        'discount_id',
+        'tax_id',
         'category_id',
+        'market_place_id',
     ];
 
 
@@ -32,5 +35,9 @@ class Category extends Model implements HasMedia
 
     public function category(){
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function market_place(){
+        return $this->belongsTo(MarketPlace::class, 'market_place_id');
     }
 }

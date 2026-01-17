@@ -1,0 +1,52 @@
+<?php
+namespace App\Filament\trait\discount;
+
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Tabs;
+use Filament\Forms\Components\TextInput;
+
+use Filament\Schemas\Components\Section;
+
+use Filament\Schemas\Components\Tabs\Tab;
+
+trait DiscountSchema {
+    public static function getDiscountFormSchema(): array {
+        return [
+            Section::make('Discount Name')
+            ->description('Enter Discount')
+            ->schema([
+                Tabs::make('Translations')
+                ->tabs([
+                    Tab::make('Arabic')
+                        ->schema([
+                            TextInput::make('name.ar')
+                            ->label('Discount Name (AR)')
+                            ->required(),
+                        ]),
+
+                    Tab::make('English')
+                        ->schema([
+                            TextInput::make('name.en')
+                            ->label('Discount Name (EN)'),
+                        ]),
+                ]),
+
+                TextInput::make('amount')
+                ->required()
+                ->validationMessages([
+                    'required' => 'Amount is required',
+                ])
+                ->placeholder('Enter Amount'),
+        
+                Select::make('type')
+                ->label('Type')
+                ->required()
+                ->options([
+                    "precentage" => 'precentage',
+                    "value" => 'value',
+                ])
+                ->placeholder('Select a Type')
+            ]), 
+        ];
+    }
+}

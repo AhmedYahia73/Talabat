@@ -14,11 +14,15 @@ use Filament\Forms\Components\FileUpload;
 
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\CheckboxList;
+use App\Filament\trait\tax\TaxShema;
+use App\Filament\trait\discount\DiscountSchema;
 
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 
 trait category {
+    use TaxShema, DiscountSchema;
+
     public static function getSharedFormSchema(): array {
         return [
             Section::make('Category Info.')
@@ -104,6 +108,27 @@ trait category {
                 })
                 ->placeholder('Select a category'),
             
+        
+                Select::make('market_place_id')
+                ->label('Market Place')
+                ->required()
+                ->relationship(
+                    name: 'market_place',
+                    titleAttribute: 'name', 
+                )
+                ->placeholder('Select a Market Place')
+                ->createOptionAction(
+                    fn (Action $action) => $action
+                        ->modalHeading('Create New Market Place') 
+                        ->modalButton('Create')              
+                        ->modalWidth('md')                   
+                )
+                ->createOptionForm([
+                    Section::make('Market Place Info.')
+                    ->description('Enter Data of Market Place')
+                    ->schema(self::getTaxFormSchema())
+                    ->collapsible(),
+                ]),
           
                 TextInput::make('image')
                 ->label('image path')

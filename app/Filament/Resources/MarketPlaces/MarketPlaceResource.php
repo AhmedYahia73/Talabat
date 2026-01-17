@@ -17,6 +17,7 @@ use Filament\Tables\Table;
 class MarketPlaceResource extends Resource
 {
     protected static ?string $model = MarketPlace::class;
+    protected static string|\UnitEnum|null $navigationGroup = 'Brands';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

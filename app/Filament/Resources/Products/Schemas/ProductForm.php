@@ -16,10 +16,16 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\CheckboxList;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Filament\trait\tax\TaxShema;
+use App\Filament\trait\discount\DiscountSchema;
+use App\Filament\trait\market_place\MarketPlaceSchema;
 
 class ProductForm
 {
     use category;
+    use TaxShema;
+    use DiscountSchema;
+    use MarketPlaceSchema;
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -30,17 +36,17 @@ class ProductForm
                 Tabs::make('Translations')
                 ->tabs([
                     Tab::make('Arabic')
-                        ->schema([
-                            TextInput::make('name.ar')
-                                ->label('Product Name (AR)')
-                                ->required(),
-                        ]),
+                    ->schema([
+                        TextInput::make('name.ar')
+                        ->label('Product Name (AR)')
+                        ->required(),
+                    ]),
 
                     Tab::make('English')
-                        ->schema([
-                            TextInput::make('name.en')
-                                ->label('Product Name (EN)'),
-                        ]),
+                    ->schema([
+                        TextInput::make('name.en')
+                        ->label('Product Name (EN)'),
+                    ]),
                 ]),
                 
                 Tabs::make('Translations')
@@ -258,6 +264,73 @@ class ProductForm
                 ->onColor('success')
                 ->offColor('danger')
                 ->default(true),
+                
+        
+                Select::make('tax_id')
+                ->label('Tax (Optional)')
+                ->required()
+                ->relationship(
+                    name: 'tax',
+                    titleAttribute: 'name', 
+                )
+                ->placeholder('Select a Tax')
+                ->createOptionAction(
+                    fn (Action $action) => $action
+                        ->modalHeading('Create New Tax') 
+                        ->modalButton('Create')              
+                        ->modalWidth('md')                   
+                )
+                ->createOptionForm([
+                    Section::make('Tax Info.')
+                    ->description('Enter Data of Tax')
+                    ->schema(self::getTaxFormSchema())
+                    ->collapsible(),
+                ]), 
+                
+        
+                Select::make('market_place_id')
+                ->label('Market Place')
+                ->required()
+                ->relationship(
+                    name: 'market_place',
+                    titleAttribute: 'name', 
+                )
+                ->placeholder('Select a Market Place')
+                ->createOptionAction(
+                    fn (Action $action) => $action
+                        ->modalHeading('Create New Market Place') 
+                        ->modalButton('Create')              
+                        ->modalWidth('md')                   
+                )
+                ->createOptionForm([
+                    Section::make('Market Place Info.')
+                    ->description('Enter Data of Market Place')
+                    ->schema(self::getMaerketFormSchema())
+                    ->collapsible(),
+                ]), 
+                
+        
+                Select::make('discount_id')
+                ->label('Discount (Optional)')
+                ->required()
+                ->relationship(
+                    name: 'discount',
+                    titleAttribute: 'name', 
+                )
+                ->placeholder('Select a Discount')
+                ->createOptionAction(
+                    fn (Action $action) => $action
+                    ->modalHeading('Create New Discount') 
+                    ->modalButton('Create')              
+                    ->modalWidth('md')                   
+                )
+                
+                ->createOptionForm([
+                    Section::make('Discount Info.')
+                    ->description('Enter Data of Discount')
+                    ->schema(self::getDiscountFormSchema())
+                    ->collapsible(),
+                ]), 
             ])
             ->collapsible(),
         ]);

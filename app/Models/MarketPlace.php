@@ -18,8 +18,7 @@ class MarketPlace extends Model implements HasMedia
         'details',
         'image',
         'slug',
-        'lng',
-        'lat',
+        'activity_id',
         'status',
     ];
 
@@ -28,11 +27,15 @@ class MarketPlace extends Model implements HasMedia
         'details' => 'array',
     ]; 
     
-    public static function getLatLngAttributes(): array
-    {
-        return [
-            'lat' => 'latitude',
-            'lng' => 'longitude',
-        ];
+    // public static function getLatLngAttributes(): array
+    // {
+    //     return [
+    //         'lat' => 'latitude',
+    //         'lng' => 'longitude',
+    //     ];
+    // }
+
+    public function activity(){
+        return $this->belongsTo(Activity::class, 'activity_id');
     }
 }
